@@ -1,6 +1,6 @@
 # Company Information Extraction System
 
-A robust AI-powered system that leverages Google's Gemini API to extract essential company details from textual content and generates structured CSV output. This project demonstrates the use of LangChain and intelligent agents for automated data processing and extraction.
+A robust AI-powered system that leverages Google's Gemini API with LangChain's LCEL (LangChain Expression Language) and intelligent agents to extract essential company details from textual content and generates structured CSV output. This project demonstrates advanced agentic workflows with tools and paragraph-level processing.
 
 ## 🎯 Project Overview
 
@@ -10,26 +10,32 @@ This system analyzes essays or documents containing company information and auto
 - **Founding Dates** (Normalized to YYYY-MM-DD format)
 - **Founders** (Complete list of founding members)
 
+The system uses an **agentic workflow** that processes each paragraph individually, using **LCEL Runnable Interface** and **Tools** for intelligent extraction and data management.
+
 In certain scenarios, the complete date information may not be available. To handle such cases:
 
--**If only the year is provided, default the date to January 1st of that year. 
--**If the year and month are provided, default the date to the 1st day of the specified month.
+- **If only the year is provided, default the date to January 1st of that year.** 
+- **If the year and month are provided, default the date to the 1st day of the specified month.**
 
 The extracted data is then exported to a clean, structured CSV file for further analysis or integration with other systems.
 
 ## 🚀 Features
 
-- **AI-Powered Extraction**: Uses Google Gemini 2.5 Flash Lite for intelligent text processing
+- **LCEL Runnable Interface**: Uses LangChain's advanced chain composition
+- **Intelligent Agent Workflow**: Tool-calling agents for smart data extraction  
+- **Paragraph-by-Paragraph Processing**: Efficient individual paragraph analysis
 - **Smart Date Normalization**: Converts various date formats to standardized YYYY-MM-DD
-- **Robust JSON Parsing**: Handles markdown-wrapped JSON responses
-- **Error Handling**: Graceful fallback for parsing failures
+- **Tool-Based Architecture**: Uses `@tool` decorator for structured data saving
+- **Robust Error Handling**: Graceful handling of API rate limits and failures
 - **CSV Export**: Clean, structured output ready for analysis
-- **Single API Call**: Efficient processing of entire documents
+- **Deduplication**: Automatic removal of duplicate company entries
 
 ## 📋 Requirements
 
 ```
 langchain-google-genai
+langchain-core
+langchain
 python-dotenv
 ```
 
@@ -45,7 +51,7 @@ python-dotenv
 2. **Install dependencies**:
 
    ```bash
-   pip install langchain-google-genai python-dotenv
+   pip install langchain-google-genai langchain-core langchain python-dotenv
    ```
 
 3. **Set up environment variables**:
@@ -61,7 +67,7 @@ python-dotenv
 
 ```
 company-extraction-system/
-├── main.py              # Main extraction script
+├── main.py              # Main extraction script with LCEL and Tools
 ├── essay_text.py        # Contains the essay data
 ├── .env                 # Environment variables (not in repo)
 ├── .gitignore          # Git ignore file
@@ -78,120 +84,122 @@ company-extraction-system/
    ```
 3. **Check output**: The system will generate `company_info.csv` with extracted data
 
+**Note**: The system may encounter rate limits on Gemini's free tier (15 requests/minute). It will automatically retry and continue processing.
+
 ## 📊 Expected Output
 
-The system processes the provided essay and extracts **28 companies**. Here's the complete expected output:
+The system processes the provided essay and extracts **30 companies**. Here's a sample of the output:
 
 ```csv
 S.N.,Company Name,Founded in,Founded by
 1,The Coca-Cola Company,1886-05-08,['Dr. John Stith Pemberton']
 2,Sony Corporation,1946-05-07,"['Masaru Ibuka', 'Akio Morita']"
-3,McDonald's Corporation,1955-04-15,['Ray Kroc']
+3,McDonald's Corporation,1955-04-15,"['Ray Kroc', 'Richard McDonald', 'Maurice McDonald']"
 4,Intel Corporation,1968-07-18,"['Robert Noyce', 'Gordon Moore']"
 5,"Samsung Electronics Co., Ltd.",1969-01-13,['Lee Byung-chul']
-6,Microsoft Corporation,1975-04-04,"['Bill Gates', 'Paul Allen']"
-7,Apple Inc.,1976-04-01,"['Steve Jobs', 'Steve Wozniak', 'Ronald Wayne']"
-8,Oracle Corporation,1977-06-16,"['Larry Ellison', 'Bob Miner', 'Ed Oates']"
-9,NVIDIA Corporation,1993-04-05,"['Jensen Huang', 'Chris Malachowsky', 'Curtis Priem']"
-10,Amazon.com Inc.,1994-07-05,['Jeff Bezos']
-11,Google LLC,1998-09-04,"['Larry Page', 'Sergey Brin']"
-12,Alibaba Group Holding Limited,1999-06-28,['Jack Ma']
-13,SAP SE,1972-04-01,"['Dietmar Hopp', 'Hans-Werner Hector', 'Hasso Plattner', 'Klaus Tschira', 'Claus Wellenreuther']"
-14,LinkedIn Corporation,2002-12-28,['Reid Hoffman']
-15,"Facebook, Inc.",2004-02-04,['Mark Zuckerberg']
-16,"Twitter, Inc.",2006-03-21,"['Jack Dorsey', 'Biz Stone', 'Evan Williams']"
-17,Spotify AB,2006-04-23,"['Daniel Ek', 'Martin Lorentzon']"
-18,YouTube LLC,2005-02-14,"['Steve Chen', 'Chad Hurley', 'Jawed Karim']"
-19,"Tesla, Inc.",2003-07-01,"['Elon Musk', 'Martin Eberhard', 'Marc Tarpenning', 'JB Straubel', 'Ian Wright']"
-20,"Airbnb, Inc.",2008-08-01,"['Brian Chesky', 'Joe Gebbia', 'Nathan Blecharczyk']"
-21,"PayPal Holdings, Inc.",1998-12-01,"['Peter Thiel', 'Max Levchin', 'Luke Nosek', 'Ken Howery']"
-22,"Stripe, Inc.",2010-01-01,"['Patrick Collison', 'John Collison']"
-23,"Square, Inc.",2009-02-20,"['Jack Dorsey', 'Jim McKelvey']"
-24,"Zoom Video Communications, Inc.",2011-04-21,['Eric Yuan']
-25,"Slack Technologies, LLC",2009-01-01,"['Stewart Butterfield', 'Eric Costello', 'Cal Henderson', 'Serguei Mourachov']"
-26,"Rivian Automotive, Inc.",2009-06-23,['RJ Scaringe']
-27,SpaceX,2002-03-14,['Elon Musk']
-28,TikTok,2016-09-01,['Zhang Yiming']
-
+...and 25 more companies
 ```
+
+**Complete extraction includes**: Coca-Cola, Sony, McDonald's, Intel, Samsung, SAP, Microsoft, Apple, Oracle, NVIDIA, Amazon, Google, PayPal, Alibaba, SpaceX, LinkedIn, Tesla, Facebook, YouTube, Twitter, Spotify, Airbnb, Slack, Square, Block, Rivian, Stripe, Zoom, TikTok, and more.
 
 ## 🧠 How It Works
 
-### 1. **AI-Powered Analysis**
+### 1. **LCEL Chain Architecture**
 
-The system uses Google Gemini to analyze the entire essay and identify company mentions with their founding details.
+```python
+# LCEL Runnable chain for paragraph processing
+paragraph_processor = RunnableLambda(process_paragraph)
+batch_processor = create_batch_processor()
+```
 
-### 2. **Smart Extraction**
+### 2. **Tool-Based Extraction**
 
-The AI agent makes intelligent decisions about:
+```python
+@tool
+def save_company_info(company_name: str, founding_date: str, founders: List[str]) -> str:
+    """Tool to save extracted company information"""
+```
 
-- Which text segments contain company information
-- How to parse founder names from various formats
-- How to handle incomplete date information
+### 3. **Agentic Workflow**
 
-### 3. **Data Normalization**
+The system uses `create_tool_calling_agent` with:
+- **Agent**: Makes intelligent decisions about data extraction
+- **Tools**: Structured company data storage
+- **Executor**: Manages the agent-tool interaction loop
+
+### 4. **Paragraph-Level Processing**
+
+1. **Split**: Essay divided into individual paragraphs
+2. **Process**: Each paragraph analyzed by the agent
+3. **Extract**: Agent calls tools to save company data
+4. **Aggregate**: All extracted data combined and deduplicated
+
+### 5. **Data Normalization**
 
 - **Dates**: Converted to YYYY-MM-DD format (missing day/month default to 01)
 - **Company Names**: Extracted as full official names
 - **Founders**: Parsed into clean lists of individual names
-
-### 4. **Output Generation**
-
-Structured CSV output with consistent formatting for downstream processing.
+- **Deduplication**: Removes duplicate companies based on name similarity
 
 ## 🔧 Technical Implementation
 
 ### Key Components:
 
-- **LangChain Integration**: Uses `ChatGoogleGenerativeAI` for AI processing
-- **JSON Response Handling**: Robust parsing with markdown cleanup
-- **Date Processing**: Smart normalization of various date formats
-- **Error Handling**: Graceful degradation on parsing failures
-- **Single API Call Strategy**: Efficient processing of entire documents
+- **LCEL Runnables**: `RunnableLambda` for custom processing logic
+- **Tool Calling Agent**: `create_tool_calling_agent` for intelligent extraction
+- **Agent Executor**: `AgentExecutor` for managing agent workflows
+- **Tools**: `@tool` decorated functions for structured data operations
+- **Prompt Templates**: `ChatPromptTemplate.from_messages` for agent instructions
 
-### Code Structure:
+### Code Architecture:
 
 ```python
-# Main workflow
-1. Load essay content
-2. Create extraction prompt
-3. Call Gemini API once
-4. Parse JSON response
-5. Generate CSV output
+# Advanced workflow with LCEL and Tools
+1. Split essay into paragraphs (RunnableLambda)
+2. Create tool-calling agent with extraction tools
+3. Process each paragraph through agent executor
+4. Agent calls save_company_info tool for each company found
+5. Aggregate and deduplicate extracted data
+6. Generate structured CSV output
 ```
 
 ## 🎯 Assignment Requirements Met
 
-✅ **LCEL Runnable Interface**: Uses LangChain's ChatGoogleGenerativeAI
-✅ **Intelligent Agent**: AI makes decisions about data extraction
-✅ **Text Parsing**: Processes essay content systematically
-✅ **Data Extraction**: Extracts company names, dates, and founders
-✅ **Date Normalization**: Handles incomplete dates with defaults
-✅ **CSV Output**: Generates structured company_info.csv
-✅ **Scalable Design**: Can process various document types
+✅ **LCEL Runnable Interface**: Uses `RunnableLambda` and custom chain composition  
+✅ **Tools and Tool Calling**: Implements `@tool` decorator and `create_tool_calling_agent`  
+✅ **Agentic Workflow**: Uses `AgentExecutor` for intelligent processing  
+✅ **Paragraph Processing**: Individual paragraph analysis as specified  
+✅ **Data Extraction**: Extracts company names, dates, and founders systematically  
+✅ **Date Normalization**: Handles incomplete dates with intelligent defaults  
+✅ **CSV Output**: Generates structured company_info.csv  
+✅ **Scalable Design**: Token-efficient paragraph-by-paragraph processing  
 
 ## 🚨 Notes
 
-- The `company_info.csv` file is included in `.gitignore` to avoid committing generated data
+- **Rate Limiting**: Free tier has 15 requests/minute limit - system handles this automatically
+- **Token Efficiency**: Paragraph processing optimizes token usage vs. single large API call
+- **Agent Decisions**: AI agent intelligently decides when and how to extract company data
+- **Tool Architecture**: Structured approach using LangChain's tool calling framework
 - API key should never be committed to version control
 - The system handles various date formats and company name variations
-- Extraction quality depends on the clarity and structure of input text
-
-## 📄 License
-
-This project is part of an academic assignment demonstrating AI-powered data extraction techniques.
 
 ## 🆘 Troubleshooting
 
 **Common Issues:**
 
-1. **API Key Error**: Ensure your `.env` file contains a valid Google API key
-2. **Import Error**: Install required packages with `pip install -r requirements.txt`
-3. **Empty Output**: Check that essay_text.py contains the essay content
-4. **JSON Parse Error**: The system includes error handling and will display raw output for debugging
+1. **Rate Limit Errors**: Normal on free tier - system will retry automatically
+2. **API Key Error**: Ensure your `.env` file contains a valid Google API key
+3. **Import Error**: Install all required packages: `langchain-google-genai`, `langchain-core`, `langchain`
+4. **Agent Scratchpad Error**: Ensure prompt template includes `{agent_scratchpad}` placeholder
+5. **Empty Output**: Check that essay_text.py contains the essay content
 
 **Getting Help:**
 
+- Monitor console output for paragraph processing progress
 - Check that your Gemini API key is active and has sufficient quota
 - Verify the essay content is properly formatted in essay_text.py
-- Review the console output for any error messages
+- Review agent execution logs for extraction details
+
+## 📄 License
+
+This project is part of an academic assignment demonstrating advanced AI-powered data extraction techniques using LangChain's LCEL framework and intelligent agents.
