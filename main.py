@@ -24,6 +24,9 @@ Return a JSON array where each element is an object with keys:
 - company_name (string)
 - founding_date (YYYY-MM-DD, fill missing day/month with 01)
 - founders (list of strings)
+In certain scenarios, the complete date information may not be available. To handle such cases:
+If only the year is provided, default the date to January 1st of that year.
+If the year and month are provided, default the date to the 1st day of the specified month.
 
 If no company info is found, return an empty array [].
 
